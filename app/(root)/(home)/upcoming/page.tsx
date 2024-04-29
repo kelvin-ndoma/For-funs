@@ -1,17 +1,24 @@
-'use client'
+'use client';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const DadJokesComponent = () => {
-  const [dadJokes, setDadJokes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [limit, setLimit] = useState(100);
+// Interface for DadJoke type
+interface DadJoke {
+  joke: string;
+}
 
+const DadJokesComponent: React.FC = () => {
+  // State variables with types
+  const [dadJokes, setDadJokes] = useState<DadJoke[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [limit, setLimit] = useState(10);
+
+  // UseEffect with dependency array
   useEffect(() => {
     const fetchDadJokes = async () => {
       try {
-        const response = await axios.get(`https://api.api-ninjas.com/v1/dadjokes?limit=${limit}`, {
+        const response = await axios.get(`https://api.api-ninjas.com/v1/dadjokes`, {
           headers: {
             'X-Api-Key': 'zjnBzW71pK2KBff/o8Rdrg==jmmLmig5gY3oVOHX' // Replace with your actual API key
           }
@@ -28,19 +35,22 @@ const DadJokesComponent = () => {
     fetchDadJokes();
   }, [limit]);
 
+  // handleLoadMore function
   const handleLoadMore = () => {
     setLoading(true);
-    setLimit(prevLimit => prevLimit + 100);
+    setLimit((prevLimit) => prevLimit + 100);
   };
 
+  // Loading and error states
   if (loading) {
-    return <div  className="text-white text-4xl">Loading...</div>;
+    return <div className="text-white text-4xl">Loading...</div>;
   }
 
   if (error) {
     return <div>{error}</div>;
   }
 
+  // Rendering jokes
   return (
     <div className="container mx-auto mt-8">
       <h1 className="text-white text-4xl font-bold mb-4">Dad Jokes</h1>
@@ -52,7 +62,7 @@ const DadJokesComponent = () => {
         ))}
       </div>
       <button onClick={handleLoadMore} className="mt-4 py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-        Load More Jokes
+        Next Jokes
       </button>
     </div>
   );

@@ -1,53 +1,66 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 
+// Interface for Fact type
+interface Fact {
+  fact: string;
+}
 
-const Facts = () => {
-  const [facts, setFacts] = useState([]);
+const Facts: React.FC = () => {
+  // State variables with types
+  const [facts, setFacts] = useState<Fact[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [limit, setLimit] = useState(30); // Initial limit
 
-  // API endpoint with placeholder for your actual API key
-  const url = `https://api.api-ninjas.com/v1/facts?limit=${limit}`;
+  // API endpoint
+  const url = `https://api.api-ninjas.com/v1/facts`;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
+  // Fetch data with async/await syntax
+  const fetchData = async () => {
+    setIsLoading(true);
+    setError(null);
 
-      try {
-        const response = await fetch(url, {
-          headers: {
-            'X-Api-Key': 'zjnBzW71pK2KBff/o8Rdrg==jmmLmig5gY3oVOHX', // Replace with your actual API key
-          },
-        });
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'X-Api-Key': 'zjnBzW71pK2KBff/o8Rdrg==jmmLmig5gY3oVOHX', // Replace with your actual API key
+        },
+      });
 
-        if (!response.ok) {
-          throw new Error(`Error fetching facts: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        setFacts(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error(`Error fetching facts: ${response.statusText}`);
       }
-    };
 
+      const data = await response.json();
+      setFacts((prevFacts) => [...prevFacts, ...data]); // Append new data to existing facts
+    } catch (error) {
+      // Handle potential errors more specifically
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        console.error('Unexpected error fetching facts:', error);
+        setError('An unknown error occurred.'); // Generic error message for non-Error types
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // useEffect hook with dependency array
+  useEffect(() => {
     fetchData();
   }, [limit]); // Fetch data whenever limit changes
 
+  // Handle "Learn More" button click
   const handleLearnMore = () => {
-    // Increase the limit by 30 to fetch more facts
-    setLimit(prevLimit => prevLimit + 30);
+    setLimit((prevLimit) => prevLimit + 30);
   };
 
   return (
     <div className="container mx-auto mt-8">
       <h1 className="text-white text-4xl font-bold mb-4">Facts</h1>
-      <p className="text-white text-2xl mb-4">This component fetches random facts using an external API. Click "Learn More" to load additional facts.</p>
+      <p className="text-white text-2xl mb-4">This component fetches random facts using an external API. Click "Next" to load additional facts.</p>
       {isLoading && <p>Loading facts...</p>}
       {error && <p className="text-red-500">{error}</p>}
       {facts.length > 0 && (
@@ -60,7 +73,7 @@ const Facts = () => {
             ))}
           </ul>
           <button onClick={handleLearnMore} className="mt-4 py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-            Learn More
+            Load Next
           </button>
         </>
       )}
